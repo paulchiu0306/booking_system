@@ -144,7 +144,7 @@ export default function App() {
   // 匯出 CSV 報表
   const handleExportCSV = () => {
     if (!bookings.length) return alert('目前沒有預約資料可匯出');
-    let csvContent = "\uFEFF"; // 避免 Excel 開啟中文亂碼 (BOM)
+    let csvContent = "\uFEFF"; // 避免 Excel 開氣中文亂碼 (BOM)
     
     // 表頭
     const headers = ['預約日期', '預約時間', ...fields.map(f => f.label), '填寫時間'];
@@ -235,6 +235,12 @@ export default function App() {
               <option value="">-- 請選擇日期與時間 --</option>
               {slots
                 .filter(s => getRemainingSlots(s) > 0)
+                .sort((a, b) => {
+                  if (a.slot_date !== b.slot_date) {
+                    return a.slot_date.localeCompare(b.slot_date);
+                  }
+                  return a.slot_time.localeCompare(b.slot_time);
+                })
                 .map(s => {
                   const remaining = getRemainingSlots(s);
                   return (
@@ -376,12 +382,20 @@ export default function App() {
                   </div>
                   <button onClick={handleAddSlot} className="w-full bg-gray-800 text-white text-xs py-2 rounded mb-4">+ 新增時段</button>
                   <ul className="space-y-2 max-h-48 overflow-y-auto">
-                    {slots.map(s => (
-                      <li key={s.id} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
-                        <span>{s.slot_date} / {s.slot_time.substring(0, 5)} <span className="text-blue-600 font-semibold">({s.capacity}人)</span></span>
-                        <button onClick={() => handleDeleteSlot(s.id)} className="text-red-500 text-xs">刪除</button>
-                      </li>
-                    ))}
+                    {slots
+                      .sort((a, b) => {
+                        if (a.slot_date !== b.slot_date) {
+                          return a.slot_date.localeCompare(b.slot_date);
+                        }
+                        return a.slot_time.localeCompare(b.slot_time);
+                      })
+                      .map(s => (
+                        <li key={s.id} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                          <span>{s.slot_date} / {s.slot_time.substring(0, 5)} <span className="text-blue-600 font-semibold">({s.capacity}人)</span></span>
+                          <button onClick={() => handleDeleteSlot(s.id)} className="text-red-500 text-xs">刪除</button>
+                        </li>
+                      ))
+                    }
                   </ul>
                 </div>
               </div>
